@@ -7,6 +7,7 @@ def load_data_fifa23():
     '''
 
     data = pd.read_csv('../raw_data/male_players_23.csv')
+    #data = pd.read_csv('/Users/michele/code/micheledeantoni/APP/back-end/raw_data/male_players_23.csv')
 
     data_fifa23 = data[data['fifa_version'] == 23]
 
