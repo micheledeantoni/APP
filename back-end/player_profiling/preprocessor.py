@@ -3,17 +3,25 @@ from sklearn.impute import SimpleImputer
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, RobustScaler, MinMaxScaler, OneHotEncoder
+from sklearn.manifold import TSNE
 
+
+def load_all_data():
+    filename = '../raw_data/male_players_23.csv'
+    chunksize = 100000
+
+    chunks = pd.read_csv(filename, chunksize=chunksize, iterator=True, low_memory=False)
+    df = pd.concat(chunks, ignore_index=True)
+
+    return df
 
 def load_data_fifa23():
     '''
     Function to return the unique players from Fifa 23
     The most updated version of each player
     '''
-    #nrows = 10000 #uncomment to run on a smaller sample size
-    data = pd.read_csv('../raw_data/male_players_23.csv',
-                       #nrows=nrows
-                       )
+
+    data = load_all_data()
     data_fifa23 = data[data['fifa_version'] == 23]
 
     data_fifa23 = data_fifa23.drop_duplicates('long_name')
@@ -123,3 +131,14 @@ def preprocess(df):
     df_preproc = preprocessor_.transform(df)
 
     return pd.DataFrame(df_preproc)
+
+def preprocess_tfne(df, perplexity = 30, early_exaggeration = 12):
+
+    tsne = TSNE(
+        n_components=3,
+        learning_rate='auto',
+        perplexity=perplexity,
+        early_exaggeration=early_exaggeration,
+        init='pca'
+    )
+    return tsne.fit_transform(preprocess(df))
