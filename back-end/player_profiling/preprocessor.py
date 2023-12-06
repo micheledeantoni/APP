@@ -3,6 +3,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, RobustScaler, MinMaxScaler, OneHotEncoder
+from sklearn.manifold import TSNE
 
 
 def load_all_data():
@@ -130,3 +131,14 @@ def preprocess(df):
     df_preproc = preprocessor_.transform(df)
 
     return pd.DataFrame(df_preproc)
+
+def preprocess_tfne(df, perplexity = 30, early_exaggeration = 12):
+
+    tsne = TSNE(
+        n_components=3,
+        learning_rate='auto',
+        perplexity=perplexity,
+        early_exaggeration=early_exaggeration,
+        init='pca'
+    )
+    return tsne.fit_transform(preprocess(df))
