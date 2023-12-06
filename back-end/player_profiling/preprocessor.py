@@ -10,9 +10,9 @@ def load_data_fifa23():
     Function to return the unique players from Fifa 23
     The most updated version of each player
     '''
-    nrows = 10000 #uncomment to run on a smaller sample size
+    #nrows = 10000 #uncomment to run on a smaller sample size
     data = pd.read_csv('../raw_data/male_players_23.csv',
-                       nrows=nrows
+                       #nrows=nrows
                        )
     data_fifa23 = data[data['fifa_version'] == 23]
 
@@ -120,4 +120,6 @@ def preprocess(df):
         ], remainder= 'passthrough')
     preprocessor_.fit(df)
 
-    return preprocessor_.transform(df)
+    df_preproc = preprocessor_.transform(df)
+
+    return pd.DataFrame(df_preproc)
