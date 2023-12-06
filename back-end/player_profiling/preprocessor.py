@@ -5,15 +5,22 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, RobustScaler, MinMaxScaler, OneHotEncoder
 
 
+def load_all_data():
+    filename = '../raw_data/male_players_23.csv'
+    chunksize = 100000
+
+    chunks = pd.read_csv(filename, chunksize=chunksize, iterator=True, low_memory=False)
+    df = pd.concat(chunks, ignore_index=True)
+
+    return df
+
 def load_data_fifa23():
     '''
     Function to return the unique players from Fifa 23
     The most updated version of each player
     '''
-    #nrows = 10000 #uncomment to run on a smaller sample size
-    data = pd.read_csv('../raw_data/male_players_23.csv',
-                       #nrows=nrows
-                       )
+
+    data = load_all_data()
     data_fifa23 = data[data['fifa_version'] == 23]
 
     data_fifa23 = data_fifa23.drop_duplicates('long_name')
