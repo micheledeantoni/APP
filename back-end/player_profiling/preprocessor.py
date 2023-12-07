@@ -7,7 +7,7 @@ from sklearn.manifold import TSNE
 
 
 def load_all_data():
-    filename = '../raw_data/male_players_23.csv'
+    filename = '../raw_data/out.csv'
     chunksize = 100000
 
     chunks = pd.read_csv(filename, chunksize=chunksize, iterator=True, low_memory=False)
