@@ -19,6 +19,26 @@ clean:
 test_structure:
 	@bash tests/test_structure.sh
 
+run_fit:
+	python -c 'from player_profiling.interface.main import fit; fit()'
+
+reset_local_files:
+	rm -rf ${ML_DIR}
+	mkdir -p ~/.lewagon/mlops/data/
+	mkdir ~/.lewagon/mlops/data/raw
+	mkdir ~/.lewagon/mlops/data/processed
+	mkdir ~/.lewagon/mlops/training_outputs
+	mkdir ~/.lewagon/mlops/training_outputs/metrics
+	mkdir ~/.lewagon/mlops/training_outputs/models
+	mkdir ~/.lewagon/mlops/training_outputs/params
+
+#======================#
+#          BQ          #
+#======================#
+
+create_bq_tables:
+	python -c 'from player_profiling.data import create_bq_tables; create_bq_tables()'
+
 #======================#
 #          API         #
 #======================#

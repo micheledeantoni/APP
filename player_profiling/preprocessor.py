@@ -1,38 +1,24 @@
 import pandas as pd
 from sklearn.impute import SimpleImputer
 from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, RobustScaler, MinMaxScaler, OneHotEncoder
 from sklearn.manifold import TSNE
 
 
-def load_all_data():
-    filename = '../raw_data/male_players_23.csv'
-    chunksize = 100000
-
-    chunks = pd.read_csv(filename, chunksize=chunksize, iterator=True, low_memory=False)
-    df = pd.concat(chunks, ignore_index=True)
-
-    return df
-
-def load_data_fifa23():
+def scale_row(row, target_sum=100):
     '''
-    Function to return the unique players from Fifa 23
-    The most updated version of each player
+    Function to return the row scaled
     '''
 
-    data = load_all_data()
-    data_fifa23 = data[data['fifa_version'] == 23]
-
-    data_fifa23 = data_fifa23.drop_duplicates('long_name')
-
-    return data_fifa23
+    factor = target_sum / row.sum()
+    return row * factor
 
 def filter_data(df):
     '''
     Function to filter data to drop the useless columns of
     the dataframe
     '''
+
     #preferred_foot
     df['preferred_foot'].replace({'Right':1, 'Left':0}, inplace= True)
 
@@ -60,10 +46,6 @@ def filter_data(df):
 
     characteristics['goalkeeping_speed'].fillna(0, inplace=True)
 
-    def scale_row(row, target_sum=100):
-        factor = target_sum / row.sum()
-        return row * factor
-
     scaled_characteristics = characteristics.apply(scale_row, axis=1)
 
     merged_df = df.combine_first(scaled_characteristics)
@@ -86,6 +68,9 @@ def filter_data(df):
     return merged_df
 
 def preprocess(df):
+    '''
+    Function to return the preprocessed data
+    '''
 
     # Instantiate a SimpleImputer object with your strategy of choice
     imputer = SimpleImputer(strategy="mean")
@@ -132,7 +117,10 @@ def preprocess(df):
 
     return pd.DataFrame(df_preproc)
 
-def preprocess_tfne(df, perplexity = 30, early_exaggeration = 12):
+def preprocess_tsne(df, perplexity = 30, early_exaggeration = 12):
+    '''
+    Function to return the preprocessed data after run the TSNE
+    '''
 
     tsne = TSNE(
         n_components=3,
@@ -141,4 +129,6 @@ def preprocess_tfne(df, perplexity = 30, early_exaggeration = 12):
         early_exaggeration=early_exaggeration,
         init='pca'
     )
-    return tsne.fit_transform(preprocess(df))
+    print(df.columns)
+
+    return tsne.fit_transform(df)
