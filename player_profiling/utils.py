@@ -1,9 +1,12 @@
 import pandas as pd
 import numpy as np
+<<<<<<< HEAD
 import requests
 from io import BytesIO
 from IPython.display import display, Image
 from PIL import Image as PILImage
+=======
+>>>>>>> 0b6a7034787db7b414256d5d99887b41d46df0e2
 
 def find_closest_players(player_index, raw_data, compressed_data):
     '''
@@ -81,6 +84,7 @@ def find_player_index(name, data):
 #            return data[data['short_name']== names[user_input -1]].index[0]
 #        except:
 #            print('Please retry, number  is not in the list')
+<<<<<<< HEAD
 
 
 
@@ -99,3 +103,5 @@ def show_face(player_id, data):
         image = PILImage.open(BytesIO(response.content))
         resized_image = image.resize(120,120)
         display(Image(data=BytesIO(resized_image.tobytes()).read()))
+=======
+>>>>>>> 0b6a7034787db7b414256d5d99887b41d46df0e2
