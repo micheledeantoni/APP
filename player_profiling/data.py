@@ -16,7 +16,7 @@ def load_all_data():
 
     chunks = pd.read_csv(filename, chunksize=chunksize, iterator=True, low_memory=False)
     df = pd.concat(chunks, ignore_index=True)
-
+#   df =pd.read_csv(filename, nrows= 10000) <- for quick calculations
     return df
 
 def load_data_fifa23():
