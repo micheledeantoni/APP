@@ -1,14 +1,33 @@
 import pandas as pd
 import numpy as np
-<<<<<<< HEAD
 import requests
 from io import BytesIO
 from IPython.display import display, Image
 from PIL import Image as PILImage
-=======
->>>>>>> 0b6a7034787db7b414256d5d99887b41d46df0e2
 
-def find_closest_players(player_index, raw_data, compressed_data):
+def ultimate_filtering (raw_data, compressed_data, continent = None, experience = None,
+                        wage_range = None, value_range= None, league_level = None):
+    if continent:
+        raw_data = raw_data[raw_data['Continent']== continent]
+
+    if experience:
+        raw_data = raw_data[raw_data['experience'] == experience]
+
+    if wage_range:
+        raw_data = raw_data[raw_data['wage_range'] == wage_range]
+
+    if value_range:
+        raw_data = raw_data[raw_data['value_range'] == value_range]
+
+    if league_level:
+        raw_data = raw_data[raw_data['league_level_bin'] == league_level]
+
+    compressed_data = compressed_data[compressed_data.index.isin(raw_data.index)]
+
+    return raw_data #, compressed_data
+
+def find_closest_players(player_index, raw_data, compressed_data, continent = None, experience = None,
+                        wage_range = None, value_range= None, league_level = None):
     '''
     player index, raw_data as a Dataframe, compressed_data as a numpy array
     function that prints out the 5 closest player to the selected one
@@ -30,12 +49,18 @@ def find_closest_players(player_index, raw_data, compressed_data):
                                compressed_data.iloc[player_of_interest_index].values, axis=1)
 
     # Step 5: Identify the 5 Closest Players
-    closest_player_indices = cluster_indices[np.argsort(distances)[1:6]]
+    closest_player_indices = cluster_indices[np.argsort(distances)]
     closest_players = raw_data.iloc[closest_player_indices]
+
+    data = ultimate_filtering (closest_players, compressed_data, continent = continent, experience = experience,
+                        wage_range = wage_range, value_range= value_range,
+                        league_level = league_level)
+
+    data = data.drop(player_index, errors ='ignore')
 
     #print(f"The closest player to the player of interest is:\n{closest_players['short_name']}")
 
-    return closest_players['short_name']
+    return data['short_name'].head(5)
 
 
 def find_player_match (name, data):
@@ -84,9 +109,6 @@ def find_player_index(name, data):
 #            return data[data['short_name']== names[user_input -1]].index[0]
 #        except:
 #            print('Please retry, number  is not in the list')
-<<<<<<< HEAD
-
-
 
 def show_face(player_id, data):
 
@@ -103,5 +125,3 @@ def show_face(player_id, data):
         image = PILImage.open(BytesIO(response.content))
         resized_image = image.resize(120,120)
         display(Image(data=BytesIO(resized_image.tobytes()).read()))
-=======
->>>>>>> 0b6a7034787db7b414256d5d99887b41d46df0e2
