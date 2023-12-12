@@ -35,7 +35,7 @@ def find_closest_players(player_index, raw_data, compressed_data, continent = No
     # Step 0: Gives player name index based on user input
     #player_index = finding_player_index(player_name,raw_data)
     # Step 1: Choose a Player
-    player_of_interest_index = player_index  # Replace with the index of the player you're interested in
+    player_of_interest_index = int(player_index)  # Replace with the index of the player you're interested in
 
     # Step 2: Get the Cluster Assignment of the Player of Interest
     cluster_of_interest = raw_data.loc[player_of_interest_index, 'label']
@@ -56,11 +56,12 @@ def find_closest_players(player_index, raw_data, compressed_data, continent = No
                         wage_range = wage_range, value_range= value_range,
                         league_level = league_level)
 
-    data = data.drop(player_index, errors ='ignore')
+    data = data.drop(int(player_index), errors ='ignore')
 
     #print(f"The closest player to the player of interest is:\n{closest_players['short_name']}")
 
-    return data['short_name'].head(5)
+    return data[['short_name', 'player_url', 'player_positions', 'age', 'height_cm',
+                 'league_name', 'club_name', 'nationality_name', 'preferred_foot', 'player_face_url', 'idx']].head(5)
 
 
 def find_player_match (name, data):
@@ -87,7 +88,8 @@ def find_player_index(name, data):
 
 #    elif len(names) == 1:
     players_indexes = data[data['short_name'].isin(names)]
-    return players_indexes['short_name']
+    return players_indexes[['short_name', 'player_url', 'player_positions', 'age', 'height_cm',
+                            'league_name', 'club_name', 'nationality_name', 'preferred_foot', 'player_face_url', 'idx']]
 
 #    elif len(names) <= 5:
 #        print(f'Found {len(names)} players for your search')

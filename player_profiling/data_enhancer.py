@@ -74,7 +74,6 @@ def data_enhancer(data, cont_json = None):
         data['Continent']= data['nationality_name'].map(continent_dictionary(data))
     data['wage_range']= data['wage_eur'].apply(wage_range_calc)
     data['experience']= data['age'].apply(player_experience)
-    data['wage_range']= data['wage_eur'].apply(wage_range_calc)
     data['value_range'] = data['value_eur'].apply(value_range_calc)
     data['league_level_bin'] = data['league_level'].apply(league_level_bin)
 

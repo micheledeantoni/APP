@@ -32,7 +32,13 @@ def fit(model_type = 'kmeans'):
         data_has_header=True
     )
 
-    data = data.drop(columns=['idx'])
+    data_continent = data['Continent']
+    data_experience = data['experience']
+    data_wage_range = data['wage_range']
+    data_value_range = data['value_range']
+    data_league_level_bin = data['league_level_bin']
+
+    data = data.drop(columns=['idx', 'Continent', 'experience', 'wage_range', 'value_range', 'league_level_bin'])
     if data.shape[0] < 10:
         print("❌ Not enough processed data retrieved to fit")
         return None
@@ -72,6 +78,12 @@ def fit(model_type = 'kmeans'):
     # Create label column on data and save
     data['label'] = model.labels_
     data['idx'] = data.index
+
+    data['Continent'] = data_continent
+    data['experience'] = data_experience
+    data['wage_range'] = data_wage_range
+    data['value_range'] = data_value_range
+    data['league_level_bin'] = data_league_level_bin
 
     load_data_to_bq(data,
         gcp_project=GCP_PROJECT,

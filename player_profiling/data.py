@@ -3,7 +3,9 @@ from pathlib import Path
 from google.cloud import bigquery
 from player_profiling.params import *
 from player_profiling.preprocessor import filter_data, preprocess, preprocess_tsne
+from player_profiling.data_enhancer import data_enhancer
 import os
+import json
 
 def load_all_data():
     '''
@@ -81,7 +83,7 @@ def load_data_to_bq(
     if table == BQ_TABLENAME_TSNE:
         data.columns = [f"_{column}" if not str(column)[0].isalpha() and not str(column)[0] == "_" else str(column) for column in data.columns]
 
-    client = bigquery.Client()
+    client = bigquery.Client(project=gcp_project)
 
     # Define write mode and schema
     write_mode = "WRITE_TRUNCATE" if truncate else "WRITE_APPEND"
@@ -106,6 +108,11 @@ def create_bq_tables():
     # Create label column
     data['label'] = 0
     data['idx'] = data.index
+
+    root_path = os.path.dirname(os.path.dirname(__file__))
+    filename = os.path.join(root_path, 'raw_data', 'continent.json')
+
+    data = data_enhancer(data, filename)
 
     load_data_to_bq(
         data,
