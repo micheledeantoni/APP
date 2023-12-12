@@ -68,6 +68,7 @@ def get_players_suggestion(player_index = int, continent = None, experience = No
 
     closest_players = find_closest_players(player_index, app.state.data, app.state.tsne,
                                            continent, experience, wage_range, value_range, league_level)
+    closest_players = closest_players.fillna('No Information')
     closest_players = closest_players.to_dict(orient="records")
 
     return {
@@ -81,8 +82,13 @@ def get_find_player_by_name(player_name: str):
     '''
 
     players_indexes = find_player_index(player_name, app.state.data)
-    players_indexes = players_indexes.to_dict(orient="records")
-
-    return {
-        'players': players_indexes,
-    }
+    if type(players_indexes) == str:
+        return {
+            'players': {}
+        }
+    else:
+        players_indexes.fillna('No Information')
+        players_indexes = players_indexes.to_dict(orient="records")
+        return {
+            'players': players_indexes,
+        }
