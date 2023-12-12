@@ -5,13 +5,23 @@ from sklearn.preprocessing import StandardScaler, RobustScaler, MinMaxScaler, On
 from sklearn.manifold import TSNE
 
 
-def scale_row(row, target_sum=100):
-    '''
-    Function to return the row scaled
-    '''
+#def scale_row(row, target_sum=100):
+#    '''
+#    Function to return the row scaled
+#    '''
+#
+#    factor = target_sum / row.sum()
+#    return row * factor
 
-    factor = target_sum / row.sum()
-    return row * factor
+def scale_row(row):
+    """
+    Custom scaling function to scale a row of characteristics.
+    Scales each value to sum up to 100.
+    """
+    total = row.sum()
+    if total == 0:
+        return row
+    return row / total * 100
 
 def filter_data(df):
     '''
@@ -48,7 +58,16 @@ def filter_data(df):
 
     scaled_characteristics = characteristics.apply(scale_row, axis=1)
 
-    merged_df = df.combine_first(scaled_characteristics)
+    # Concatenate the DataFrames
+    merged_df = pd.concat([df, scaled_characteristics], axis=1)
+
+    # Overwrite columns from df with corresponding columns from scaled_characteristics
+    merged_df.update(scaled_characteristics)
+
+    # Drop duplicate columns, keeping only the last occurrence (from scaled_characteristics)
+    merged_df = merged_df.loc[:,~merged_df.columns.duplicated(keep='last')]
+
+
     merged_df = merged_df[['off_work_rate', 'def_work_rate', 'preferred_foot', 'age', 'height_cm',
        'weight_kg', 'league_level', 'weak_foot', 'skill_moves', 'pace',
        'shooting', 'passing', 'dribbling', 'physic', 'attacking_crossing',
