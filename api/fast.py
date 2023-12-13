@@ -5,6 +5,8 @@ from player_profiling.data import get_data_with_cache
 from player_profiling.utils import find_closest_players, find_player_index
 from player_profiling.params import *
 from player_profiling.registry import load_model
+from player_profiling.scraping_utils import plot_metrics
+from player_profiling.plot_utils import player_radar_plot
 from pathlib import Path
 
 app = FastAPI()
@@ -92,3 +94,29 @@ def get_find_player_by_name(player_name: str):
         return {
             'players': players_indexes,
         }
+
+@app.get("/statistics")
+def get_statistics_by_name(player_index: int):
+    '''
+    Endpoint to return players statistics
+    '''
+
+    statistics = plot_metrics(app.state.data, player_index)
+    statistics['aggregated_data'] = statistics['aggregated_data'].to_dict(orient="records")
+
+    return {
+        'statistics': statistics
+    }
+
+@app.get("/data_radar_plot")
+def get_data_radar_plot(player1_index: int, player2_index: int):
+    '''
+    Endpoint to return data to do the radar plot
+    '''
+
+    radar_data = player_radar_plot(app.state.data, player1_index, player2_index)
+    radar_data['grouped_df'] = radar_data['grouped_df'].to_dict(orient="records")
+
+    return {
+        'radar_data': radar_data
+    }

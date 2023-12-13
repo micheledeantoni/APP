@@ -1,5 +1,3 @@
-import sys
-sys.path.append("/Users/michele/code/micheledeantoni/APP")
 import plotly.graph_objects as go
 import plotly.express as px
 import pandas as pd
@@ -7,7 +5,8 @@ from player_profiling.preprocessor import *
 
 def player_radar_plot(raw_data, index1 , index2):
     raw_data['idx']=raw_data.index
-    filtered_data= filter_data(raw_data)
+    #filtered_data= filter_data(raw_data)
+    filtered_data = raw_data
     columns_to_keep = [
     'attacking_crossing', 'attacking_finishing', 'attacking_heading_accuracy',
     'attacking_short_passing', 'attacking_volleys', 'skill_dribbling',
@@ -26,30 +25,34 @@ def player_radar_plot(raw_data, index1 , index2):
 
     # 2. Group by Initial Work and Average
     grouped_df = df_subset.groupby(lambda x: x.split('_')[0], axis=1).mean()
-    categories = grouped_df.columns
+    #categories = grouped_df.columns
 
-    fig = go.Figure()
+    return {
+            'grouped_df': grouped_df
+    }
 
-    fig.add_trace(go.Scatterpolar(
-        r=grouped_df.iloc[index1].values,
-        theta=categories,
-        fill='toself',
-        name=raw_data[raw_data['idx']==index1]['short_name'].values[0]
-    ))
-    fig.add_trace(go.Scatterpolar(
-        r=grouped_df.iloc[index2].values,
-        theta=categories,
-        fill='toself',
-        name=raw_data[raw_data['idx']==index2]['short_name'].values[0]
-    ))
+    #fig = go.Figure()
 
-    fig.update_layout(
-    polar=dict(
-        radialaxis=dict(
-        visible=True,
-        range=[0, 4]
-        )),
-    showlegend=True
-    )
+    #fig.add_trace(go.Scatterpolar(
+    #    r=grouped_df.iloc[index1].values,
+    #    theta=categories,
+    #    fill='toself',
+    #    name=raw_data[raw_data['idx']==index1]['short_name'].values[0]
+    #))
+    #fig.add_trace(go.Scatterpolar(
+    #    r=grouped_df.iloc[index2].values,
+    #    theta=categories,
+    #    fill='toself',
+    #    name=raw_data[raw_data['idx']==index2]['short_name'].values[0]
+    #))
 
-    fig.show()
+    #fig.update_layout(
+    #polar=dict(
+    #    radialaxis=dict(
+    #    visible=True,
+    #    range=[0, 4]
+    #    )),
+    #showlegend=True
+    #)
+
+    #fig.show()

@@ -1,6 +1,7 @@
 # data science
 numpy
 pandas
+plotly
 
 # Uncomment if you use sklearn
 scikit-learn
