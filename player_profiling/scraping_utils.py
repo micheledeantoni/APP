@@ -47,7 +47,7 @@ def get_player_data(search_url):
 
             if position == 'Goalkeeper':
                 appearances = int(columns[5].get_text(strip=True).replace("-", "0"))
-                pps = float(columns[6].get_text(strip=True).replace("-", "0").replace(",", "."))
+                ppg = float(columns[6].get_text(strip=True).replace("-", "0").replace(",", "."))
                 goals_conceded = int(columns[14].get_text(strip=True).replace("-", "0"))
                 clean_sheets = int(columns[15].get_text(strip=True).replace("-", "0"))
                 minutes_played = columns[16].get_text(strip=True).replace('-', '0').replace('.', '').replace('\'', '')
@@ -56,14 +56,14 @@ def get_player_data(search_url):
                     'season': season,
                     'competition': competition,
                     'appearances': appearances,
-                    'PPS': pps,
+                    'PPG': ppg,
                     'goals_conceded': goals_conceded,
                     'clean_sheets': clean_sheets,
                     'minutes_played': minutes_played
                 })
             else:
                 appearances = int(columns[5].get_text(strip=True).replace("-", "0"))
-                pps = float(columns[6].get_text(strip=True).replace("-", "0").replace(",", "."))
+                ppg = float(columns[6].get_text(strip=True).replace("-", "0").replace(",", "."))
                 goals = int(columns[7].get_text(strip=True).replace("-", "0"))
                 assists = int(columns[8].get_text(strip=True).replace("-", "0"))
                 minutes_played = columns[17].get_text(strip=True).replace('-', '0').replace('.', '').replace('\'', '')
@@ -72,14 +72,13 @@ def get_player_data(search_url):
                     'season': season,
                     'competition': competition,
                     'appearances': appearances,
-                    'PPS': pps,
+                    'PPG': ppg,
                     'goals': goals,
                     'assists': assists,
                     'minutes_played': minutes_played
                 })
 
         return pd.DataFrame(player_data)
-
 
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -100,15 +99,36 @@ def add_trendline(ax, data, color):
         slope = round(z[0], 2)
         ax.text(0.05, 0.95, f'Trend: {slope}', transform=ax.transAxes, fontsize=12, verticalalignment='top', color=color)
 
-def plot_metrics(player_name):
+def from_index_to_name(data, index):
+    data = data.iloc[int(index)]
+    attempts = []
+    attempts.append(' '.join(data['player_url'].split('/')[-2].split('-')))
+    fn = '-'.join(data['player_url'].split('/')[-2].split('-')[:2])
+    ln = data['player_url'].split('/')[-2].split('-')[-1]
+    attempts.append(' '.join([fn,ln]))
+    attempts.append(' '.join(data['short_name'].split()))
+    return attempts
+
+def plot_metrics(data, index):
     # Player selection
-    search_url = create_search_url(player_name)
-    scraped_df = get_player_data(search_url)
+    name_list = from_index_to_name(data, index)
+    i = 0  # Initialize index
+    scraped_df_shape = 0  # Initialize shape of scraped_df
+
+    while scraped_df_shape == 0 and i < len(name_list):
+        # Create search URL and get player data
+        search_url = create_search_url(name_list[i])
+        scraped_df = get_player_data(search_url)
+        # Update the shape of scraped_df
+        scraped_df_shape = scraped_df.shape[0]
+
+        # Increment the index for the next iteration
+        i += 1
 
     try:
         # Filter the DataFrame to only include rows where 'minutes_played' >= 45
         scraped_df = scraped_df[scraped_df['minutes_played'] >= 45]
-        scraped_df = scraped_df[scraped_df['PPS'] != 0]
+        scraped_df = scraped_df[scraped_df['PPG'] != 0]
 
         # Focus only on the most recent 5 seasons
         recent_seasons = sorted(scraped_df['season'].unique(), reverse=True)[:5]
@@ -123,7 +143,7 @@ def plot_metrics(player_name):
         # Aggregate data by season
         if is_goalkeeper:
             aggregated_data = scraped_df.groupby('season').agg({
-                'PPS': 'mean',
+                'PPG': 'mean',
                 'goals_conceded': 'sum',
                 'clean_sheets': 'sum',
                 'minutes_played': 'sum',
@@ -134,33 +154,33 @@ def plot_metrics(player_name):
             aggregated_data['average_goals_conceded_per_appearance'] = aggregated_data['goals_conceded'] / aggregated_data['appearances']
             aggregated_data['clean_sheet_per_appearance'] = aggregated_data['clean_sheets'] / aggregated_data['appearances']
 
-            metrics = ['appearances', 'PPS', 'average_goals_conceded_per_appearance', 'clean_sheet_per_appearance', 'minutes_played']
+            metrics = ['appearances', 'PPG', 'average_goals_conceded_per_appearance', 'clean_sheet_per_appearance', 'minutes_played']
         else:
             aggregated_data = scraped_df.groupby('season').agg({
                 'appearances': 'sum',
-                'PPS': 'mean',
+                'PPG': 'mean',
                 'goals': 'sum',
                 'assists': 'sum',
                 'minutes_played': 'sum'
-            }).sort_index()
-            metrics = ['appearances', 'PPS', 'goals', 'assists', 'minutes_played']
+                }).sort_index()
+            metrics = ['appearances', 'PPG', 'goals', 'assists', 'minutes_played']
 
-        # Visualization
-        colors = ['#1f77b4', '#7f7f7f', '#aec7e8', '#c7c7c7']  # Shades of blue and grey
-        fig, axes = plt.subplots(nrows=1, ncols=len(metrics), figsize=(20, 5))
+            # Visualization
+            #colors = ['#1f77b4', '#7f7f7f', '#aec7e8', '#c7c7c7']  # Shades of blue and grey
+            #fig, axes = plt.subplots(nrows=1, ncols=len(metrics), figsize=(20, 5))
 
+            # Plot each metric
+            #for i, metric in enumerate(metrics):
+            #    aggregated_data[metric].plot(kind='bar', color=colors[i % len(colors)], ax=axes[i])
+            #    add_trendline(axes[i], aggregated_data[metric], color='black')
+            #    axes[i].set_title(f'{metric.replace("_", " ").capitalize()} per season')
+            #    axes[i].set_ylabel(metric.replace("_", " ").capitalize())
 
-        # Plot each metric
-        for i, metric in enumerate(metrics):
-            aggregated_data[metric].plot(kind='bar', color=colors[i % len(colors)], ax=axes[i])
-            add_trendline(axes[i], aggregated_data[metric], color='black')
-            axes[i].set_title(f'{metric.replace("_", " ").capitalize()} per season')
-            axes[i].set_ylabel(metric.replace("_", " ").capitalize())
-
-        plt.tight_layout()
-        plt.show()
-    except:
-        return 'Data is not available for the selected player'
-
-def from_index_to_name(data, index):
-    return ' '.join(data['player_url'][index].split('/')[-2].split('-'))
+        print(aggregated_data)
+        return {'metrics': metrics,
+                'aggregated_data': aggregated_data}
+            #plt.tight_layout()
+            #plt.show()
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return pd.DataFrame()
