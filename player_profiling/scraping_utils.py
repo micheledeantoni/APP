@@ -100,11 +100,31 @@ def add_trendline(ax, data, color):
         slope = round(z[0], 2)
         ax.text(0.05, 0.95, f'Trend: {slope}', transform=ax.transAxes, fontsize=12, verticalalignment='top', color=color)
 
-def plot_metrics(player_name):
-    # Player selection
-    search_url = create_search_url(player_name)
-    scraped_df = get_player_data(search_url)
+def from_index_to_name(data, index):
+    attempts =[]
+    attempts.append(' '.join(data['player_url'][index].split('/')[-2].split('-')))
+    fn = '-'.join(data['player_url'][index].split('/')[-2].split('-')[:2])
+    ln = data['player_url'][index].split('/')[-2].split('-')[-1]
+    attempts.append(' '.join([fn,ln]))
+    attempts.append(' '.join(data['short_name'][index].split()))
+    return attempts
 
+def plot_metrics(data, index):
+    # Player selection
+    name_list = from_index_to_name(data, index)
+    i = 0  # Initialize index
+    scraped_df_shape = 0  # Initialize shape of scraped_df
+
+    while scraped_df_shape == 0 and i < len(name_list):
+        # Create search URL and get player data
+        search_url = create_search_url(name_list[i])
+        scraped_df = get_player_data(search_url)
+
+        # Update the shape of scraped_df
+        scraped_df_shape = scraped_df.shape[0]
+
+        # Increment the index for the next iteration
+        i += 1
     try:
         # Filter the DataFrame to only include rows where 'minutes_played' >= 45
         scraped_df = scraped_df[scraped_df['minutes_played'] >= 45]
@@ -161,6 +181,3 @@ def plot_metrics(player_name):
         plt.show()
     except:
         return 'Data is not available for the selected player'
-
-def from_index_to_name(data, index):
-    return ' '.join(data['player_url'][index].split('/')[-2].split('-'))
