@@ -62,7 +62,7 @@ def filter_data(df):
     merged_df = pd.concat([df, scaled_characteristics], axis=1)
 
     # Overwrite columns from df with corresponding columns from scaled_characteristics
-    merged_df.update(scaled_characteristics)
+    #merged_df.update(scaled_characteristics)
 
     # Drop duplicate columns, keeping only the last occurrence (from scaled_characteristics)
     merged_df = merged_df.loc[:,~merged_df.columns.duplicated(keep='last')]

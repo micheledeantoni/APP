@@ -2,6 +2,7 @@
 numpy
 pandas
 plotly
+IPython
 
 # Uncomment if you use sklearn
 scikit-learn
@@ -27,3 +28,4 @@ uvicorn
 mlflow
 
 db-dtypes
+bs4
