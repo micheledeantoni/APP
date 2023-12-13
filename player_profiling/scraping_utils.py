@@ -121,10 +121,9 @@ def plot_metrics(data, index):
         scraped_df = get_player_data(search_url)
         # Update the shape of scraped_df
         scraped_df_shape = scraped_df.shape[0]
-
+        
         # Increment the index for the next iteration
         i += 1
-
     try:
         # Filter the DataFrame to only include rows where 'minutes_played' >= 45
         scraped_df = scraped_df[scraped_df['minutes_played'] >= 45]
@@ -176,7 +175,6 @@ def plot_metrics(data, index):
             #    axes[i].set_title(f'{metric.replace("_", " ").capitalize()} per season')
             #    axes[i].set_ylabel(metric.replace("_", " ").capitalize())
 
-        print(aggregated_data)
         return {'metrics': metrics,
                 'aggregated_data': aggregated_data}
             #plt.tight_layout()
