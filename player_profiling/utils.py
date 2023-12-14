@@ -4,6 +4,8 @@ import requests
 from io import BytesIO
 from IPython.display import display, Image
 from PIL import Image as PILImage
+from unidecode import unidecode
+
 
 def ultimate_filtering (raw_data, compressed_data, continent = None, experience = None,
                         wage_range = None, value_range= None, league_level = None):
@@ -52,9 +54,20 @@ def find_closest_players(player_index, raw_data, compressed_data, continent = No
     closest_player_indices = cluster_indices[np.argsort(distances)]
     closest_players = raw_data.iloc[closest_player_indices]
 
+    if closest_players.iloc[player_of_interest_index]['player_positions'] == 'GK':
+        closest_players = closest_players[closest_players['player_positions']== 'GK']
+    else:
+        closest_players = closest_players[closest_players['player_positions']!= 'GK']
+
+
+
     data = ultimate_filtering (closest_players, compressed_data, continent = continent, experience = experience,
                         wage_range = wage_range, value_range= value_range,
                         league_level = league_level)
+
+
+
+
 
     data = data.drop(int(player_index), errors ='ignore')
 
@@ -64,18 +77,17 @@ def find_closest_players(player_index, raw_data, compressed_data, continent = No
                  'league_name', 'club_name', 'nationality_name', 'preferred_foot', 'player_face_url', 'idx']].head(5)
 
 
-def find_player_match (name, data):
-
+def find_player_match(name, data):
     matched_names = []
-    name = name.upper()
+    normalized_name = unidecode(name).upper()
 
     for sn, ln in zip(data['short_name'], data['long_name']):
-        snc = sn.upper()
-        lnc = ln.upper()
-        if name in snc:
+        snc = unidecode(sn).upper()
+        lnc = unidecode(ln).upper()
+        if normalized_name in snc:
             matched_names.append(sn)
-        elif name in lnc:
-             matched_names.append(sn)
+        elif normalized_name in lnc:
+            matched_names.append(sn)
 
     return matched_names
 
