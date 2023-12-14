@@ -1,77 +1,72 @@
-# Basic package setup for students to use
+# How to config, build and run API and Docker image (Step by step)
 
-This is a generic boilerplate for basic ML/DL projects.
-It has the basic functionality for doing one-off predictions based on simple inputs (i.e. not on images for example, or large numbers of inputs).
+## Create environment variables in .env file
 
-It contains nothing more than all the configuraton files for the project. No actual code.
+- MODEL_TARGET=mlflow
 
-## What's being used:
-- Streamlit for the front end
-- FastAPI serving the back end
-- Model storage on GCS / MLFlow (python functions to be written)
-- Everything to deploy with Docker
+- GCP_PROJECT=<your_gcp_project_id>
+- GCP_REGION=europe-west1
 
-## Using this template:
+- GOOGLE_APPLICATION_CREDENTIALS=credentials.json (here you need to copy the credentials.json to inside our project path. You can generate it running: gcloud auth application-default login)
 
-> :warning: **Back-end and front-end should go in separate repositories** :warning:
+- BQ_REGION=EU
+- BQ_DATASET=APP
+- BQ_TABLENAME=male_players_23
+- BQ_TABLENAME_TSNE=tsne_data
 
-All commands needed have been included in the Makefiles:
+- MLFLOW_TRACKING_URI=https://mlflow.lewagon.ai
+- MLFLOW_EXPERIMENT=APP_experiment_<your_github_name>
+- MLFLOW_MODEL_NAME=APP_<your_github_name>
 
-### Back-end
+- DOCKER_LOCAL_PORT=8080
+- DOCKER_REPO_NAME=docker
+- GAR_IMAGE=app
 
-- `make run_api` to run the API locally
-- `make docker_#####` to run Docker stuff:
-  - Commands to build and run (nteractively) a local Docker image
-  - Commands to build and run (interactively) a Docker image ready for GCP (i.e. using linux/amd64 infra)
-  - Commands to push and deploy to GCP
+## Create Biq Query database and tables (run terminal)
 
-Just type `make <tab>` on the command line to see all possibilities
+bq mk \
+    --project_id $GCP_PROJECT \
+    --data_location $BQ_REGION \
+    $BQ_DATASET
 
-### Front-end
-- `make streamlit`: defaults to `make streamlit_local`
-- `make streamlit_local`: run streamlit locally and connect to local API (running through uvicorn on port 8000)
-- `make streamlit_local_docker`: run streamlit locally and connect to local Docker container (running on port 8080)
-- `make streamlit_cloud`: run streamlit locally and connect to cloud API
+bq mk --location=$GCP_REGION $BQ_DATASET.$BQ_TABLENAME
 
-Just type `make <tab>` on the command line to see all possibilities
+bq mk --location=$GCP_REGION $BQ_DATASET.$BQ_TABLENAME_TSNE
 
-URIs for local and cloud APIs are included in the `.streamlit/secrets.toml` file (or in the Secrets setting on Streamlit Cloud)
+## Populate tables for the first use (it takes +/- 11 minutes)
 
+make create_bq_tables
 
-## Complete the configuration
+## Fit model (it takes +/- 9 minutes)
 
-### Back-end
+make run_fit
 
-Copy `.env.sample` and `.env.yaml.sample` to new files `.env` and `.env.yaml` and update all variables with your project identifiers.
+## Run API (you can run and test to see if its all working before create Docker image)
 
-Requirements.txt:
-- `requirements.txt`: for production excluding all packages that are redundant in prod
-= `requirements_dev.txt`: adding packages for local usage including ipython, debugging, matplotlib, etc.
-- Update `requirements.txt` if you use TensorFlow (uncomment the respective lines).
+make run_api
 
-### Front-end
+Control + C to stop the API when you are satisfied with your tests
 
-Complete the following files (if needed):
-- `requirements.txt`
-- `.streamlit/config.toml`: mainly for layout purposes
-- `.streamlit/secrets.toml`: base it on the sample file; reflect the contents also in the Secrets settings on Streamlit Cloud
+## Create Docker image (run in the same path as Dockerfile and setup.py)
 
-## Repository structure (highlights)
+Launch docker app
 
-> :warning: **Back-end and front-end should go in separate repositories** :warning:
+docker info (to check if its running)
 
-### Back-end
+docker build --tag=$GAR_IMAGE:dev .  (it takes +/- 5 minutes)
 
-- `packagename/`: your package (rename this, and adapt the configuration files - tip: Ctrl-Shift-F or Cmd-Shift-F in VS Code)
-  - `data/`: only small static data (no large files), or temporary files (not tracked by git)
-- `api/`: this is where your API code goes
-- `models/`: your saved models (not tracked by git, should be stored elsewhere: GCS, MLFlow, ...)
-- `raw_data/`: your data (not tracked by git, should be stored elsewhere for cloud: GCS, MLFLow, ...)
-- `notebooks/`: your notebooks, tracked by git, but avoid working with different people on one notebook (include your name in the filename)
+docker images  (to see if the docker image is running. It needs to have a Repository called APP)
 
-### Front-end
+docker run -it -e PORT=8000 -p 8000:8000 $GAR_IMAGE:dev sh  (to check if you can go inside the docker image)
 
-- `app.py`: main streamlit page
-- `pages/`: put a .py file per page here if you use multiple pages
-- `media/`: store visual elements for your pages here
-- `.streamlit/`: configuration files for streamlit
+exit (to go out of the docker image)
+
+docker run -e PORT=8000 -p 8000:8000 --env-file .env $GAR_IMAGE:dev  (to run the API from Docker Image)
+
+Go to your browser and see if the API is running and working
+
+## To stop Docker Image
+
+docker ps  (get the Container ID)
+
+docker container stop <Container_ID>
